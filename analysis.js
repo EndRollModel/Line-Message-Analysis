@@ -1,10 +1,14 @@
-let analysisAll;
 const uploadData = document.querySelector('#uploadLineChat')
 uploadData.addEventListener('change', formatLine);
-const ctx = document.getElementById('myChart');
+const title = document.getElementById('title');
+const ctxLine = document.getElementById('myLineChart');
+const ctxBar = document.getElementById('myBarChart');
+const uploadLabel = document.getElementById('uploadLabel');
 
 async function formatLine(e) {
+    title.style.display = 'none';
     uploadData.style.display = 'none';
+    uploadLabel.style.display = 'none';
     const fileInfo = e.target.files[0]
     const file = await fileInfo.text();
     let dayMatch;
@@ -33,9 +37,10 @@ async function formatLine(e) {
     }
     // 儲存物件
     const allData = {};
-    const timeTag = {'0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, '11':0, '12':0, '13':0, '14':0, '15':0, '16':0, '17':0, '18':0, '19':0, '20':0, '21':0, '22':0, '23':0}
-    const allChatData = {};
-    const member = {};
+    allData.time = {};
+    const timeTag = {'0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0, '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 0, '22': 0, '23': 0};
+    const allChatData = {}; // 所有對話資料
+    const memberChatCount = {}; // 成員對話次數
     // 先把日期分出來切割 然後日期內 最後一行去除 在進行分類
     const dayChat = [];
     const dayIndex = [];
@@ -78,82 +83,186 @@ async function formatLine(e) {
         })
     });
 
-    // 計算資料總和 foreach
+    /**
+     * 資料處理部分
+     * allChatData{
+     *     chatDat : {
+     *         // 對話紀錄..
+     *     },
+     *     count : {
+     *         user1 : {
+     *             全部 : ,
+     *             照片 : ,
+     *             貼圖 : ,
+     *             檔案 : ,
+     *         },
+     *         user2 : {
+     *             全部 : ,
+     *         }
+     *     },
+     *     time : {
+     *         全部 : {0:1 ...},
+     *         user1 : {0:1 ...},
+     *     }
+     * }
+     */
     Object.keys(allChatData).map((elem, index) => {
         allChatData[elem].map((item) => {
             if (item.match(nameMatch) !== null) {
+                const name = item.match(nameMatch)[0].replace(/\t/g, ''); // 使用者名稱
                 // 計算發話總和
-                const name = item.match(nameMatch)[0].replace(/\t/g, '');
-                if (member.hasOwnProperty(name)) {
-                    member[name]++;
+                if (memberChatCount.hasOwnProperty(name)) {
+                    memberChatCount[name]['全部']++;
                 } else {
-                    member[name] = 1
+                    memberChatCount[name] = {}
+                    memberChatCount[name]['全部'] = 1;
                 }
-                // 計算傳送資訊 (貼圖/相片/)
-            }
-            if (item.match(chatMatch) !== null) {
+                // 計算除了一般發話外的內容
+                if (item.match(systemMatch) !== null) {
+                    const chatType = item.match(onlySMatch)[0].replace(/[\[\]]/g, '');
+                    if (!memberChatCount[name].hasOwnProperty(chatType)) {
+                        memberChatCount[name][chatType] = 1;
+                    }
+                    memberChatCount[name][chatType]++;
+                }
+                // 計算對話頻率
                 const tempHour = item.match(chatMatch)[0].split(':')[0];
                 let hourKey = tempHour.length === 2 && tempHour.indexOf('0') === 0 ? tempHour.replace('0', '') : tempHour; // 將0去掉
-                timeTag[hourKey]++;
+                if (!allData.time.hasOwnProperty('全部')) {
+                    allData.time['全部'] = JSON.parse(JSON.stringify(timeTag));
+                }
+                allData.time['全部'][hourKey]++;
+
+                const username = item.match(nameMatch)[0].replace(/\t/g, '');
+                if (!allData.time.hasOwnProperty(username)) {
+                    allData.time[username] = JSON.parse(JSON.stringify(timeTag))
+                }
+                allData.time[username][hourKey]++;
+                // 計算傳送資訊 (貼圖/相片)
+
             }
         });
     });
     // 對話分析結果
-    allData.chatData = allChatData;
-    allData.count = member
-    allData.dayCount = Object.keys(allData.chatData).length;
-    allData.time = timeTag;
-    analysisAll = allData;
+    allData.chatData = allChatData; // 所有對話資料
+    allData.count = memberChatCount; // 所有人對話總計
+    allData.dayCount = Object.keys(allData.chatData).length; // 總共對話了幾天
 
     let chat_count = '';
-    Object.keys(allData.count).forEach((elem, index)=>{
-        if(index !== allData.count.length){
-            chat_count += `${elem} : ${allData.count[elem]}\r\n`
-        }else {
-            chat_count += `${elem} : ${allData.count[elem]}`;
+    Object.keys(allData.count).forEach((elem, index) => {
+        if (index !== allData.count.length) {
+            chat_count += `${elem} : ${allData.count[elem].全部}\r\n`
+        } else {
+            chat_count += `${elem} : ${allData.count[elem].全部}`;
         }
     });
-
+    // 文字版
     // 對話次數
-    document.getElementById('chat_count').style.display = 'inline';
-    document.getElementById('chat_count').textContent += chat_count;
+    // document.getElementById('chat_count').style.display = 'inline';
+    // document.getElementById('chat_count').textContent += chat_count;
     // 總對話天數
-    document.getElementById('day_count').style.display = 'inline';
-    document.getElementById('day_count').textContent += JSON.stringify(allData.dayCount);
-    // 時段頻率 文字版
+    // document.getElementById('day_count').style.display = 'inline';
+    // document.getElementById('day_count').textContent += JSON.stringify(allData.dayCount);
+    // 時段頻率
     // document.getElementById('time_tag').style.display = 'inline';
     // document.getElementById('time_tag').textContent += JSON.stringify(allData.time).replace(/[{}]/g, '');
+
+    // 圖表版
     // 時段頻率
     document.getElementById('line_chart').style.visibility = 'visible';
-    // const LineConfig = {
-    //     type: 'line',
-    //     // labels:['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
-    //     datasets: [{
-    //         label:['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
-    //         fill: false,
-    //         data: Object.values(allData.time),
-    //         // data: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
-    //         borderColor: 'rgb(75, 192, 192)'
-    //     }]
-    // }
+    // 總對話數
+    document.getElementById('bar_chart').style.visibility = 'visible';
 
-    // 總對話次數與時間 （頻率表）
-    const chartConfig = {
+    // 對話次數與時間 （頻率表）
+    const lineDatasetsArrays = [];
+    const colors = colorSet(Object.keys(allData.time).length);
+    Object.keys(allData.time).map((elem, index) => {
+        if (elem === '全部') {return;}
+        lineDatasetsArrays.push({
+            label: elem,
+            data: Object.values(allData.time[elem]),
+            backgroundColor: colors.backgroundColor[index],
+            borderColor: colors.borderColor[index],
+            borderWidth: 1
+        })
+    })
+    const chartLineConfig = {
         type: 'line',
         data: {
             labels: [
                 '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
             ],
-            datasets: [{
-                label: '總對話次數',
-                backgroundColor: 'rgb(255, 99, 132)',
-                borderColor: 'rgb(255, 99, 132)',
-                data: Object.values(allData.time),
-            }],
+            datasets: lineDatasetsArrays,
         },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: '對話時間（活動頻率)'
+                },
+            },
+            responsive: true,
+        }
     };
-    new Chart(ctx, chartConfig)
+    new Chart(ctxLine, chartLineConfig);
+    // 總對話次數
+    const barDatasetsArrays = [];
+    const countColors = colorSet(Object.keys(allData.count).length);
+    Object.keys(allData.count).map((elem, index) => {
+        const countData = {};
+        countData[elem] = allData.count[elem].全部;
+        barDatasetsArrays.push({
+            label: [elem],
+            data: countData,
+            borderColor: countColors.borderColor[index],
+            backgroundColor: countColors.backgroundColor[index],
+            borderWidth: 1
+        })
+    });
+    const chartBarConfig = {
+        type: 'bar',
+        data: {
+            labels: Object.keys(allData.count),
+            datasets: barDatasetsArrays,
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: '對話次數'
+                },
+            },
+            responsive: true,
+            scales: {
+                x: {
+                    stacked: true,
+                }
+            }
+        }
+    }
+    console.log(JSON.stringify(chartBarConfig))
+    new Chart(ctxBar, chartBarConfig);
 }
 
-function timeFormat() {
+function colorSet(count) {
+    const returnObject = {};
+    returnObject.backgroundColor = [];
+    returnObject.borderColor = [];
+    const backgroundColor = ['rgba(255, 99, 132, 0.2)', 'rgba(255, 159, 64, 0.2)', 'rgba(255, 205, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(201, 203, 207, 0.2)'];
+    const borderColor = ['rgb(255, 99, 132)', 'rgb(255, 159, 64)', 'rgb(255, 205, 86)', 'rgb(75, 192, 192)', 'rgb(54, 162, 235)', 'rgb(153, 102, 255)', 'rgb(201, 203, 207)'];
+    for (let i = 0; i < count; i++) {
+        let ring;
+        ring = Math.floor(i / backgroundColor.length);
+        if (i > backgroundColor.length - 1) {
+            returnObject.borderColor.push(borderColor[i - borderColor.length * ring]);
+            returnObject.backgroundColor.push(backgroundColor[i - backgroundColor.length * ring]);
+        } else {
+            returnObject.borderColor.push(borderColor[i])
+            returnObject.backgroundColor.push(backgroundColor[i])
+        }
+    }
+    return returnObject;
 }
+
+
+
