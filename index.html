@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <style>
-        body {
-            background-image: url(bear.gif);
-            background-repeat: no-repeat;
-            background-attachment: local;
-            background-size: cover;
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
         }
     </style>
 </head>
@@ -19,18 +19,6 @@
     <input type="file" id="uploadLineChat" name="uploadLineChat" data-target="file-uploader" style="height: 0px; width: 0px">
 </label>
 <br/>
-<!--<div>-->
-<!--    <h4 style="display: none; white-space: pre-line;" id="chat_count">總對話次數 :-->
-<!--    </h4>-->
-<!--</div>-->
-<!--<br/>-->
-<!--<div>-->
-<!--    <h4 style="display: none; white-space: pre-line;" id="day_count">總對話天數 ： </h4>-->
-<!--</div>-->
-<!--<br/>-->
-<!--<div>-->
-<!--    <h4 style="display: none; white-space: pre-line;" id="time_tag"> 對話時間（小時） ： </h4>-->
-<!--</div>-->
 <div>
     <div id="line_chart" style="text-align: center; display: inline-block;visibility: hidden;position: relative; height: 40vh; width: 45vw">
         <canvas id="myLineChart"></canvas>
@@ -39,6 +27,8 @@
         <canvas id="myBarChart"></canvas>
     </div>
 </div>
+
+<img src="bear.gif" class="center" >
 
 <br/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
