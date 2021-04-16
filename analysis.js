@@ -3,7 +3,15 @@ uploadData.addEventListener('change', formatLine);
 const title = document.getElementById('title');
 const ctxLine = document.getElementById('myLineChart');
 const ctxBar = document.getElementById('myBarChart');
+const ctxPolar = document.getElementById('myPolarChart');
 const uploadLabel = document.getElementById('uploadLabel');
+//chartObject
+let lineChart;
+let barChart;
+let polarChart;
+//polar
+let polarLabelData = [];
+let polarInfoData = [];
 
 async function formatLine(e) {
     title.style.display = 'none';
@@ -117,7 +125,7 @@ async function formatLine(e) {
                     memberChatCount[name] = {}
                     memberChatCount[name]['全部'] = 1;
                 }
-                // 計算除了一般發話外的內容
+                // 計算除了一般發話外的內容 傳送資訊 (貼圖/相片)
                 if (item.match(systemMatch) !== null) {
                     const chatType = item.match(onlySMatch)[0].replace(/[\[\]]/g, '');
                     if (!memberChatCount[name].hasOwnProperty(chatType)) {
@@ -138,8 +146,6 @@ async function formatLine(e) {
                     allData.time[username] = JSON.parse(JSON.stringify(timeTag))
                 }
                 allData.time[username][hourKey]++;
-                // 計算傳送資訊 (貼圖/相片)
-
             }
         });
     });
@@ -172,7 +178,10 @@ async function formatLine(e) {
     document.getElementById('line_chart').style.visibility = 'visible';
     // 總對話數
     document.getElementById('bar_chart').style.visibility = 'visible';
+    // 對話內容分析
+    document.getElementById('polar_chart').style.visibility = 'visible';
 
+    let delayed;
     // 對話次數與時間 （頻率表）
     const lineDatasetsArrays = [];
     const colors = colorSet(Object.keys(allData.time).length);
@@ -202,15 +211,29 @@ async function formatLine(e) {
                 },
             },
             responsive: true,
+            animation: {
+                onComplete: () => {
+                    delayed = true;
+                },
+                delay: (context) => {
+                    let delay = 0;
+                    if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                        delay = context.dataIndex * 100 + context.datasetIndex * 100;
+                    }
+                    return delay;
+                },
+            },
         }
     };
-    new Chart(ctxLine, chartLineConfig);
+    lineChart = new Chart(ctxLine, chartLineConfig);
     // 總對話次數
+    let barDelayed = true
     const barDatasetsArrays = [];
     const countColors = colorSet(Object.keys(allData.count).length);
     Object.keys(allData.count).map((elem, index) => {
         const countData = {};
         countData[elem] = allData.count[elem].全部;
+        // console.log(JSON.stringify(countData));
         barDatasetsArrays.push({
             label: [elem],
             data: countData,
@@ -226,6 +249,18 @@ async function formatLine(e) {
             datasets: barDatasetsArrays,
         },
         options: {
+            animation: {
+                onComplete: () => {
+                    barDelayed = true;
+                },
+                delay: (context) => {
+                    let delay = 0;
+                    if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                        delay = context.dataIndex * 100 + context.datasetIndex * 100;
+                    }
+                    return delay;
+                },
+            },
             plugins: {
                 title: {
                     display: true,
@@ -240,8 +275,41 @@ async function formatLine(e) {
             }
         }
     }
-    console.log(JSON.stringify(chartBarConfig))
-    new Chart(ctxBar, chartBarConfig);
+    barChart = new Chart(ctxBar, chartBarConfig);
+    // 對象對話內容分析
+    // labels - 顏色標籤 - polarLabelData
+    // data -
+    const radioUser = []; // 選擇用
+    Object.keys(allData.count).forEach((username)=>{
+        radioUser.push(username);
+        polarLabelData.push(allData.count[username]);
+        polarInfoData.push({
+            // labels : Object.keys(allData.count[username]),
+            data : Object.values(allData.count[username]),
+            backgroundColor: colorSet(Object.keys(allData.count[username]).length).backgroundColor
+        })
+    });
+    // const chartPolarConfig = {
+    //     type: 'pie',
+    //     data: {
+    //         labels: Object.keys(allData.count[Object.keys(allData.count)[0]]),
+    //         datasets: polarInfoData,
+    //     },
+    //     options: {
+    //         responsive: true,
+    //         plugins: {
+    //             legend: {
+    //                 position: 'top',
+    //             },
+    //             title: {
+    //                 display: true,
+    //                 text: '個人訊息種類分析'
+    //             }
+    //         }
+    //     },
+    // };
+    // console.log(JSON.stringify(chartPolarConfig))
+    // polarChart = new Chart(ctxPolar, chartPolarConfig);
 }
 
 function colorSet(count) {
@@ -263,6 +331,5 @@ function colorSet(count) {
     }
     return returnObject;
 }
-
 
 
