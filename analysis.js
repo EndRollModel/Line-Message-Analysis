@@ -1,17 +1,21 @@
-const uploadData = document.querySelector('#uploadLineChat')
+const uploadData = document.querySelector('#uploadLineChat');
 uploadData.addEventListener('change', formatLine);
 const title = document.getElementById('title');
 const ctxLine = document.getElementById('myLineChart');
 const ctxBar = document.getElementById('myBarChart');
-const ctxPolar = document.getElementById('myPolarChart');
+const ctxDoughnut = document.getElementById('myDoughnutChart');
 const uploadLabel = document.getElementById('uploadLabel');
+const doughnutBlock = document.getElementById('doughnut_choose_block');
+
+//allData
+let pageData;
 //chartObject
 let lineChart;
 let barChart;
-let polarChart;
-//polar
-let polarLabelData = [];
-let polarInfoData = [];
+let doughnutChart;
+//doughnut
+let doughnutLabelData = [];
+let doughnutInfoData = [];
 
 async function formatLine(e) {
     title.style.display = 'none';
@@ -46,7 +50,32 @@ async function formatLine(e) {
     // 儲存物件
     const allData = {};
     allData.time = {};
-    const timeTag = {'0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0, '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 0, '22': 0, '23': 0};
+    const timeTag = {
+        '0': 0,
+        '1': 0,
+        '2': 0,
+        '3': 0,
+        '4': 0,
+        '5': 0,
+        '6': 0,
+        '7': 0,
+        '8': 0,
+        '9': 0,
+        '10': 0,
+        '11': 0,
+        '12': 0,
+        '13': 0,
+        '14': 0,
+        '15': 0,
+        '16': 0,
+        '17': 0,
+        '18': 0,
+        '19': 0,
+        '20': 0,
+        '21': 0,
+        '22': 0,
+        '23': 0
+    };
     const allChatData = {}; // 所有對話資料
     const memberChatCount = {}; // 成員對話次數
     // 先把日期分出來切割 然後日期內 最後一行去除 在進行分類
@@ -94,7 +123,7 @@ async function formatLine(e) {
     /**
      * 資料處理部分
      * allChatData{
-     *     chatDat : {
+     *     chatData : {
      *         // 對話紀錄..
      *     },
      *     count : {
@@ -103,6 +132,7 @@ async function formatLine(e) {
      *             照片 : ,
      *             貼圖 : ,
      *             檔案 : ,
+     *             對話 : ,
      *         },
      *         user2 : {
      *             全部 : ,
@@ -114,8 +144,8 @@ async function formatLine(e) {
      *     }
      * }
      */
-    Object.keys(allChatData).map((elem, index) => {
-        allChatData[elem].map((item) => {
+    Object.keys(allChatData).map((elem) => { // 所有對話
+        allChatData[elem].map((item, index) => { // 每日
             if (item.match(nameMatch) !== null) {
                 const name = item.match(nameMatch)[0].replace(/\t/g, ''); // 使用者名稱
                 // 計算發話總和
@@ -149,6 +179,13 @@ async function formatLine(e) {
             }
         });
     });
+    // 對話種類次數
+    Object.keys(memberChatCount).map((username)=>{
+        const chatTotal = Object.values(memberChatCount[username]).reduce((a,b)=>a+b);
+        memberChatCount[username]['對話'] = memberChatCount[username]['全部'] - (chatTotal - memberChatCount[username]['全部']);
+    })
+
+    // console.log(memberChatCount);
     // 對話分析結果
     allData.chatData = allChatData; // 所有對話資料
     allData.count = memberChatCount; // 所有人對話總計
@@ -172,24 +209,36 @@ async function formatLine(e) {
     // 時段頻率
     // document.getElementById('time_tag').style.display = 'inline';
     // document.getElementById('time_tag').textContent += JSON.stringify(allData.time).replace(/[{}]/g, '');
+    pageData = allData;
 
     // 圖表版
     // 時段頻率
     document.getElementById('line_chart').style.visibility = 'visible';
+    createRateOfDay(pageData);
     // 總對話數
     document.getElementById('bar_chart').style.visibility = 'visible';
+    createChatCount(pageData);
     // 對話內容分析
-    document.getElementById('polar_chart').style.visibility = 'visible';
+    document.getElementById('doughnut_chart').style.visibility = 'visible';
+    createChatType(pageData);
 
+}
+
+/**
+ * 對話次數與時間 （頻率表）
+ * @param data
+ */
+function createRateOfDay(data) {
     let delayed;
-    // 對話次數與時間 （頻率表）
     const lineDatasetsArrays = [];
-    const colors = colorSet(Object.keys(allData.time).length);
-    Object.keys(allData.time).map((elem, index) => {
-        if (elem === '全部') {return;}
+    const colors = colorSet(Object.keys(data.time).length);
+    Object.keys(data.time).map((elem, index) => {
+        if (elem === '全部') {
+            return;
+        }
         lineDatasetsArrays.push({
             label: elem,
-            data: Object.values(allData.time[elem]),
+            data: Object.values(data.time[elem]),
             backgroundColor: colors.backgroundColor[index],
             borderColor: colors.borderColor[index],
             borderWidth: 1
@@ -226,14 +275,19 @@ async function formatLine(e) {
         }
     };
     lineChart = new Chart(ctxLine, chartLineConfig);
-    // 總對話次數
+}
+
+/**
+ *  總對話次數
+ */
+function createChatCount(data) {
+    let delayed;
     let barDelayed = true
     const barDatasetsArrays = [];
-    const countColors = colorSet(Object.keys(allData.count).length);
-    Object.keys(allData.count).map((elem, index) => {
+    const countColors = colorSet(Object.keys(data.count).length);
+    Object.keys(data.count).map((elem, index) => {
         const countData = {};
-        countData[elem] = allData.count[elem].全部;
-        // console.log(JSON.stringify(countData));
+        countData[elem] = data.count[elem].全部;
         barDatasetsArrays.push({
             label: [elem],
             data: countData,
@@ -245,7 +299,7 @@ async function formatLine(e) {
     const chartBarConfig = {
         type: 'bar',
         data: {
-            labels: Object.keys(allData.count),
+            labels: Object.keys(data.count),
             datasets: barDatasetsArrays,
         },
         options: {
@@ -276,42 +330,66 @@ async function formatLine(e) {
         }
     }
     barChart = new Chart(ctxBar, chartBarConfig);
-    // 對象對話內容分析
-    // labels - 顏色標籤 - polarLabelData
-    // data -
-    const radioUser = []; // 選擇用
-    Object.keys(allData.count).forEach((username)=>{
-        radioUser.push(username);
-        polarLabelData.push(allData.count[username]);
-        polarInfoData.push({
-            // labels : Object.keys(allData.count[username]),
-            data : Object.values(allData.count[username]),
-            backgroundColor: colorSet(Object.keys(allData.count[username]).length).backgroundColor
-        })
-    });
-    // const chartPolarConfig = {
-    //     type: 'pie',
-    //     data: {
-    //         labels: Object.keys(allData.count[Object.keys(allData.count)[0]]),
-    //         datasets: polarInfoData,
-    //     },
-    //     options: {
-    //         responsive: true,
-    //         plugins: {
-    //             legend: {
-    //                 position: 'top',
-    //             },
-    //             title: {
-    //                 display: true,
-    //                 text: '個人訊息種類分析'
-    //             }
-    //         }
-    //     },
-    // };
-    // console.log(JSON.stringify(chartPolarConfig))
-    // polarChart = new Chart(ctxPolar, chartPolarConfig);
 }
 
+/**
+ * 對話種類分析
+ * @param data
+ */
+function createChatType(data) {
+    // 對象對話內容分析
+    // labels - 顏色標籤 - doughnutLabelData
+    const radioUser = []; // 選擇用
+    Object.keys(data.count).forEach((username) => {
+        radioUser.push(username);
+        const userData = JSON.parse(JSON.stringify(data.count[username]));
+        delete userData['全部'];
+        console.log(userData);
+        doughnutLabelData.push(userData);
+        doughnutInfoData.push({
+            // labels : Object.keys(allData.count[username]),
+            data: Object.values(userData),
+            backgroundColor: colorSet(Object.keys(userData).length).backgroundColor
+        })
+    });
+
+    const chartPolarConfig = {
+        type: 'pie',
+        data: {
+            labels: Object.keys(doughnutLabelData[0]),
+            datasets: [doughnutInfoData[0]],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: '個人訊息種類分析'
+                }
+            }
+        },
+    };
+    doughnutChart = new Chart(ctxDoughnut, chartPolarConfig);
+
+    let innerRadio = '';
+    radioUser.forEach((elem, index) => {
+        if (index === 0) {
+            innerRadio += `<input type="radio" value="${elem}" name="chooseChatType" onClick="chooseDoughnut(${index})" checked/>${elem} `
+        } else {
+            innerRadio += `<input type="radio" value="${elem}" name="chooseChatType" onClick="chooseDoughnut(${index})"/>${elem} `
+        }
+    })
+    doughnutBlock.innerHTML = innerRadio
+}
+
+/**
+ * 顏色列表 (官方sample顏色)
+ * @param count
+ * @return {}
+ */
 function colorSet(count) {
     const returnObject = {};
     returnObject.backgroundColor = [];
@@ -332,4 +410,14 @@ function colorSet(count) {
     return returnObject;
 }
 
-
+/**
+ * 根據選擇對象 改變圓餅圖的內容
+ * @param number
+ */
+function chooseDoughnut(number) {
+    doughnutChart.data.labels.pop();
+    doughnutChart.data.datasets.pop();
+    doughnutChart.data.labels = Object.keys(doughnutLabelData[number]);
+    doughnutChart.data.datasets.push(doughnutInfoData[number]);
+    doughnutChart.update();
+}
