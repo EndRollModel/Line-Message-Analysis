@@ -9,6 +9,9 @@ const doughnutBlock = document.getElementById('doughnut_choose_block');
 
 //allData
 let pageData;
+// lang
+let totalLang;
+let textLang;
 //chartObject
 let lineChart;
 let barChart;
@@ -24,6 +27,7 @@ async function formatLine(e) {
     const fileInfo = e.target.files[0]
     const file = await fileInfo.text();
     let dayMatch;
+
     const dayMatch_zh_tw = /(2[0-1][0-9][0-9])\/(0[1-9]|1[0-2])\/((0[1-9]|[12]\d|3[01])|([1-9]|[12]\d|3[01]))（(週[一二三四五六日]|[一|二三四五六日])）/g; // 中文
     const dayMatch_en = /(Sun|Mon|Tue|Wed|Thu|Fri|Sat), ((0[1-9]|[12]\d|3[01])|([1-9]|[12]\d|3[01]))\/(0[1-9]|1[0-2])\/((2)[0-1][0-9][0-9])/g // 英文
     // 聊天標籤
@@ -38,9 +42,13 @@ async function formatLine(e) {
     const firstLine = file.split(/\n/)[0]
     switch (true) {
         case firstLine.indexOf('Chat history') > -1:
+            textLang = 'Text';
+            totalLang = 'Total';
             dayMatch = dayMatch_en;
             break;
         case firstLine.indexOf('聊天記錄') > -1:
+            totalLang = '全部';
+            textLang = '對話';
             dayMatch = dayMatch_zh_tw;
             break;
         default: // 預設中文
@@ -150,10 +158,10 @@ async function formatLine(e) {
                 const name = item.match(nameMatch)[0].replace(/\t/g, ''); // 使用者名稱
                 // 計算發話總和
                 if (memberChatCount.hasOwnProperty(name)) {
-                    memberChatCount[name]['全部']++;
+                    memberChatCount[name][totalLang]++;
                 } else {
                     memberChatCount[name] = {}
-                    memberChatCount[name]['全部'] = 1;
+                    memberChatCount[name][totalLang] = 1;
                 }
                 // 計算除了一般發話外的內容 傳送資訊 (貼圖/相片)
                 if (item.match(systemMatch) !== null) {
@@ -166,10 +174,10 @@ async function formatLine(e) {
                 // 計算對話頻率
                 const tempHour = item.match(chatMatch)[0].split(':')[0];
                 let hourKey = tempHour.length === 2 && tempHour.indexOf('0') === 0 ? tempHour.replace('0', '') : tempHour; // 將0去掉
-                if (!allData.time.hasOwnProperty('全部')) {
-                    allData.time['全部'] = JSON.parse(JSON.stringify(timeTag));
+                if (!allData.time.hasOwnProperty(totalLang)) {
+                    allData.time[totalLang] = JSON.parse(JSON.stringify(timeTag));
                 }
-                allData.time['全部'][hourKey]++;
+                allData.time[totalLang][hourKey]++;
 
                 const username = item.match(nameMatch)[0].replace(/\t/g, '');
                 if (!allData.time.hasOwnProperty(username)) {
@@ -182,7 +190,7 @@ async function formatLine(e) {
     // 對話種類次數
     Object.keys(memberChatCount).map((username)=>{
         const chatTotal = Object.values(memberChatCount[username]).reduce((a,b)=>a+b);
-        memberChatCount[username]['對話'] = memberChatCount[username]['全部'] - (chatTotal - memberChatCount[username]['全部']);
+        memberChatCount[username][textLang] = memberChatCount[username][totalLang] - (chatTotal - memberChatCount[username][totalLang]);
     })
 
     // console.log(memberChatCount);
@@ -194,9 +202,9 @@ async function formatLine(e) {
     let chat_count = '';
     Object.keys(allData.count).forEach((elem, index) => {
         if (index !== allData.count.length) {
-            chat_count += `${elem} : ${allData.count[elem].全部}\r\n`
+            chat_count += `${elem} : ${allData.count[elem][totalLang]}\r\n`
         } else {
-            chat_count += `${elem} : ${allData.count[elem].全部}`;
+            chat_count += `${elem} : ${allData.count[elem][totalLang]}`;
         }
     });
     // 文字版
@@ -233,7 +241,7 @@ function createRateOfDay(data) {
     const lineDatasetsArrays = [];
     const colors = colorSet(Object.keys(data.time).length);
     Object.keys(data.time).map((elem, index) => {
-        if (elem === '全部') {
+        if (elem === totalLang) {
             return;
         }
         lineDatasetsArrays.push({
@@ -287,7 +295,7 @@ function createChatCount(data) {
     const countColors = colorSet(Object.keys(data.count).length);
     Object.keys(data.count).map((elem, index) => {
         const countData = {};
-        countData[elem] = data.count[elem].全部;
+        countData[elem] = data.count[elem][totalLang];
         barDatasetsArrays.push({
             label: [elem],
             data: countData,
@@ -343,7 +351,7 @@ function createChatType(data) {
     Object.keys(data.count).forEach((username) => {
         radioUser.push(username);
         const userData = JSON.parse(JSON.stringify(data.count[username]));
-        delete userData['全部'];
+        delete userData[totalLang];
         console.log(userData);
         doughnutLabelData.push(userData);
         doughnutInfoData.push({

@@ -4,49 +4,24 @@
     <meta charset="UTF-8">
     <title>Line對話分析</title>
     <style type="text/css">
-        .center {
-            display: block;
-            margin-top: auto;
-            margin-left: auto;
-            margin-right: auto;
-            width: 85%;
+        #uploadLabel {
+            width: 20%;
+            margin: auto;
+            background-color: white;
+            color: black;
+            border: 2px solid #008CBA;
         }
-        #Header {
-            width: 360px;
-            height: 80px;
-            text-align: center;
-            line-height: 80px;
-            font-size: 15px;
-            color: #fffaf3;
-            font-weight: bold;
-            background-color: #f9c81e;
-        }
-        #body {
-            width: 360px;
-            height: 280px;
-            text-align: center;
-            line-height: 280px;
-            font-size: 15px;
-            color: #f9c81e;
-            font-weight: bold;
-            background-color: #fffaf3;
-        }
-        #Footer {
-            width: 360px;
-            height: 80px;
-            text-align: center;
-            line-height: 80px;
-            font-size: 15px;
-            color: #fffaf3;
-            font-weight: bold;
-            background-color: #f9c81e;
+        #uploadLabel:hover {
+            background-color: #008CBA;
+            color: white;
         }
     </style>
 </head>
 <body>
-<h3 id="title" style="text-align: center">HI 歡迎使用 Line對話分析工具 點選下圖上傳對話紀錄 (測試中)</h3>
+<h3 id="title" style="text-align: center">Line對話分析工具 (測試版本)</h3>
 <label id="uploadLabel" for="uploadLineChat" style="display: block; text-align: center">
-    <img style="text-align: center" src="upload.png">
+<!--    <img style="text-align: center" src="upload.png">-->
+    上傳對話紀錄
     <input type="file" id="uploadLineChat" name="uploadLineChat" data-target="file-uploader"
            style="height: 0px; width: 0px;text-align: center">
 </label>
