@@ -6,6 +6,9 @@ const ctxBar = document.getElementById('myBarChart');
 const ctxDoughnut = document.getElementById('myDoughnutChart');
 const uploadLabel = document.getElementById('uploadLabel');
 const doughnutBlock = document.getElementById('doughnut_choose_block');
+const textCountCBlock = document.getElementById('text_count_choose_block');
+const textCountRank = document.getElementById('text_count_rank');
+const textCountDiv = document.getElementById('textCount');
 
 //allData
 let pageData;
@@ -19,6 +22,8 @@ let doughnutChart;
 //doughnut
 let doughnutLabelData = [];
 let doughnutInfoData = [];
+//textCount
+let textCount = [];
 
 async function formatLine(e) {
     title.style.display = 'none';
@@ -37,6 +42,9 @@ async function formatLine(e) {
     // 特殊狀態
     const systemMatch = /(0[0-9]|1[0-9]|2[0-3]):(([012345])[0-9])\t.*?\t\[(檔案|照片|貼圖|禮物|影片|Video|File|Photo|Sticker)]/g // 對話內容若為傳送圖片等
     const onlySMatch = /\[(檔案|照片|貼圖|禮物|影片|Video|File|Photo|Sticker)]/g
+    // 對話去除
+    const chatNameMatch = /(0[0-9]|1[0-9]|2[0-3]):(([012345])[0-9])\t.*?\t/g; // 若為聊天格式
+    const chatUrl = /(https:\/\/|http)/g // 網址類型去除
 
     // 取得第一行資訊 確認第一行是中文還是英文
     const firstLine = file.split(/\n/)[0]
@@ -58,39 +66,14 @@ async function formatLine(e) {
     // 儲存物件
     const allData = {};
     allData.time = {};
-    const timeTag = {
-        '0': 0,
-        '1': 0,
-        '2': 0,
-        '3': 0,
-        '4': 0,
-        '5': 0,
-        '6': 0,
-        '7': 0,
-        '8': 0,
-        '9': 0,
-        '10': 0,
-        '11': 0,
-        '12': 0,
-        '13': 0,
-        '14': 0,
-        '15': 0,
-        '16': 0,
-        '17': 0,
-        '18': 0,
-        '19': 0,
-        '20': 0,
-        '21': 0,
-        '22': 0,
-        '23': 0
-    };
+    const timeTag = {'0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0, '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 0, '22': 0, '23': 0};
     const allChatData = {}; // 所有對話資料
     const memberChatCount = {}; // 成員對話次數
+    const personChat = {};
     // 先把日期分出來切割 然後日期內 最後一行去除 在進行分類
     const dayChat = [];
     const dayIndex = [];
     const dayData = file.match(dayMatch);
-
     // 取得每一個日期的標籤
     dayData.forEach((elem) => {
         dayIndex.push(file.indexOf(elem));
@@ -132,7 +115,7 @@ async function formatLine(e) {
      * 資料處理部分
      * allChatData{
      *     chatData : {
-     *         // 對話紀錄..
+     *          [對話紀錄/record],
      *     },
      *     count : {
      *         user1 : {
@@ -149,6 +132,10 @@ async function formatLine(e) {
      *     time : {
      *         全部 : {0:1 ...},
      *         user1 : {0:1 ...},
+     *     },
+     *     personChat:{
+     *         user1 : [],
+     *         user2: [],
      *     }
      * }
      */
@@ -184,6 +171,18 @@ async function formatLine(e) {
                     allData.time[username] = JSON.parse(JSON.stringify(timeTag))
                 }
                 allData.time[username][hourKey]++;
+                // 對話分類
+                if(item.match(onlySMatch) === null){ // 排除貼圖 檔案 照片 圖片等內容
+                    const nameSMatch = item.match(chatNameMatch)[0];
+                    const personChatInfo = item.replace(nameSMatch, '');
+                    if (personChatInfo.match(chatUrl) === null) {
+                        if (!personChat.hasOwnProperty(name)) {
+                            personChat[name] = [];
+                        } else {
+                            personChat[name].push(personChatInfo);
+                        }
+                    }
+                }
             }
         });
     });
@@ -198,6 +197,7 @@ async function formatLine(e) {
     allData.chatData = allChatData; // 所有對話資料
     allData.count = memberChatCount; // 所有人對話總計
     allData.dayCount = Object.keys(allData.chatData).length; // 總共對話了幾天
+    allData.personChat = personChat; // 每個人的對話內容
 
     let chat_count = '';
     Object.keys(allData.count).forEach((elem, index) => {
@@ -207,6 +207,9 @@ async function formatLine(e) {
             chat_count += `${elem} : ${allData.count[elem][totalLang]}`;
         }
     });
+    // 分析字詞出現次數
+    chatFreq(allData.personChat);
+
     // 文字版
     // 對話次數
     // document.getElementById('chat_count').style.display = 'inline';
@@ -230,6 +233,48 @@ async function formatLine(e) {
     document.getElementById('doughnut_chart').style.visibility = 'visible';
     createChatType(pageData);
 
+}
+
+/**
+ * 分析字詞次數
+ * @param personChat
+ */
+function chatFreq(personChat) {
+    let chooseRadio = '';
+    const wordAnalysis = {};
+    Object.keys(personChat).map((username)=>{
+        if(personChat[username].length > 0){
+            const userRecord = personChat[username].reduce((a, b)=>{
+                return a.toString() + b.toString()
+            })
+            wordAnalysis[username] = WordFreqSync().process(userRecord)
+        }
+    })
+    // console.log(JSON.stringify(wordAnalysis));
+    //建立選擇器
+    //建立資料
+    Object.keys(wordAnalysis).forEach((username, index)=>{
+        let chatRank = '';
+        if(index === 0){
+            chooseRadio += `<input type="radio" value="${username}" name="textCountChoose" onclick="textCountChoose(${index})" checked>${username}`
+        }else{
+            chooseRadio += `<input type="radio" value="${username}" name="textCountChoose" onclick="textCountChoose(${index})">${username}`
+        }
+        for (let i = 0; i < 15; i++) {
+            if(i >= wordAnalysis[username].length){
+                return;
+            }
+            if(i === 0){
+                chatRank += `${username}常用字詞排行榜</br>`
+            }
+            chatRank += `${i + 1}名: <b>${wordAnalysis[username][i][0]}</b>  次數：<b>${wordAnalysis[username][i][1]}</b> <br>`
+        }
+        textCount.push(chatRank)
+    })
+
+    textCountDiv.style.visibility = 'visible';
+    textCountCBlock.innerHTML = chooseRadio;
+    textCountRank.innerHTML = textCount[0];
 }
 
 /**
@@ -352,7 +397,7 @@ function createChatType(data) {
         radioUser.push(username);
         const userData = JSON.parse(JSON.stringify(data.count[username]));
         delete userData[totalLang];
-        console.log(userData);
+        // console.log(userData);
         doughnutLabelData.push(userData);
         doughnutInfoData.push({
             // labels : Object.keys(allData.count[username]),
@@ -391,6 +436,10 @@ function createChatType(data) {
         }
     })
     doughnutBlock.innerHTML = innerRadio
+}
+
+function textCountChoose(number){
+    textCountRank.innerHTML = textCount[number];
 }
 
 /**

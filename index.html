@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <title>Line對話分析</title>
     <style type="text/css">
+        #line_chart #bar_chart #doughnut_chart {
+            margin: auto;
+        }
+
         #uploadLabel {
             width: 20%;
             margin: auto;
@@ -11,6 +15,7 @@
             color: black;
             border: 2px solid #008CBA;
         }
+
         #uploadLabel:hover {
             background-color: #008CBA;
             color: white;
@@ -20,7 +25,7 @@
 <body>
 <h3 id="title" style="text-align: center">Line對話分析工具 (測試版本)</h3>
 <label id="uploadLabel" for="uploadLineChat" style="display: block; text-align: center">
-<!--    <img style="text-align: center" src="upload.png">-->
+    <!--    <img style="text-align: center" js="upload.png">-->
     上傳對話紀錄
     <input type="file" id="uploadLineChat" name="uploadLineChat" data-target="file-uploader"
            style="height: 0px; width: 0px;text-align: center">
@@ -38,16 +43,24 @@
         </div>
     </div>
     <br/>
-        <div id="doughnut_chart"
-            style="text-align: center; display: inline-block;visibility: hidden; height: 40vh; width: 40vw">
-            <div id="doughnut_choose_block"></div>
-            <canvas id="myDoughnutChart"></canvas>
-        </div>
+    <br/>
+    <br/>
+    <div id="doughnut_chart"
+         style="text-align: center; display: inline-block;visibility: hidden; height: 30vh; width: 35vw">
+        <div id="doughnut_choose_block"></div>
+        <canvas id="myDoughnutChart"></canvas>
+    </div>
+    <div id="textCount"
+         style="text-align: center; display: inline-grid;visibility: hidden; height: 30vh; width: 35vw">
+        <div id="text_count_choose_block"></div>
+        <div id="text_count_rank"></div>
     </div>
 </div>
-<!--<img src="bear.gif" class="center">-->
+</div>
 <br/>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/wordfreq.js"></script>
+<script src="js/wordfreq.work.js"></script>
+<script src="js/chart.min.js"></script>
 <script src="analysis.js"></script>
 </body>
 </html>
