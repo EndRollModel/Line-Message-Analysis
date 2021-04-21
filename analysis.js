@@ -242,7 +242,7 @@ async function formatLine(e) {
 function chatFreq(personChat) {
     let chooseRadio = '';
     const wordAnalysis = {};
-    Object.keys(personChat).map((username)=>{
+    Object.keys(personChat).forEach((username)=>{
         if(personChat[username].length > 0){
             const userRecord = personChat[username].reduce((a, b)=>{
                 return a.toString() + b.toString()
@@ -250,9 +250,7 @@ function chatFreq(personChat) {
             wordAnalysis[username] = WordFreqSync().process(userRecord)
         }
     })
-    // console.log(JSON.stringify(wordAnalysis));
     //建立選擇器
-    //建立資料
     Object.keys(wordAnalysis).forEach((username, index)=>{
         let chatRank = '';
         if(index === 0){
@@ -262,16 +260,16 @@ function chatFreq(personChat) {
         }
         for (let i = 0; i < 15; i++) {
             if(i >= wordAnalysis[username].length){
-                return;
+                break;
             }
             if(i === 0){
                 chatRank += `${username}常用字詞排行榜</br>`
             }
+            //建立資料
             chatRank += `${i + 1}名: <b>${wordAnalysis[username][i][0]}</b>  次數：<b>${wordAnalysis[username][i][1]}</b> <br>`
         }
         textCount.push(chatRank)
     })
-
     textCountDiv.style.visibility = 'visible';
     textCountCBlock.innerHTML = chooseRadio;
     textCountRank.innerHTML = textCount[0];
@@ -438,6 +436,10 @@ function createChatType(data) {
     doughnutBlock.innerHTML = innerRadio
 }
 
+/**
+ * 常用字詞排行榜選擇
+ * @param number
+ */
 function textCountChoose(number){
     textCountRank.innerHTML = textCount[number];
 }

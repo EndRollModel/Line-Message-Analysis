@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <title>Line對話分析</title>
     <style type="text/css">
-        #line_chart #bar_chart #doughnut_chart {
-            margin: auto;
+        #line_chart, #bar_chart, #doughnut_chart, #textCount {
+            background-color: lightslategray;
+            margin: 0 auto;
         }
-
+        canvas {
+            margin: 0 auto;
+        }
+        #doughnut_choose_block{
+            background-color: saddlebrown;
+        }
         #uploadLabel {
             width: 20%;
             margin: auto;
@@ -15,7 +21,6 @@
             color: black;
             border: 2px solid #008CBA;
         }
-
         #uploadLabel:hover {
             background-color: #008CBA;
             color: white;
@@ -34,26 +39,23 @@
 <div>
     <div>
         <div id="line_chart"
-             style="text-align: center; display: inline-block;visibility: hidden;position: relative; height: 40vh; width: 45vw">
+             style="text-align: center; display: inline-block;visibility: hidden;position: relative; width: 30%">
             <canvas id="myLineChart"></canvas>
         </div>
         <div id="bar_chart"
-             style="text-align: center; display: inline-block;visibility: hidden;position: relative; height: 40vh; width: 45vw">
+             style="text-align: center; display: inline-block;visibility: hidden;position: relative; width: 30%">
             <canvas id="myBarChart"></canvas>
         </div>
-    </div>
-    <br/>
-    <br/>
-    <br/>
-    <div id="doughnut_chart"
-         style="text-align: center; display: inline-block;visibility: hidden; height: 30vh; width: 35vw">
-        <div id="doughnut_choose_block"></div>
-        <canvas id="myDoughnutChart"></canvas>
-    </div>
-    <div id="textCount"
-         style="text-align: center; display: inline-grid;visibility: hidden; height: 30vh; width: 35vw">
-        <div id="text_count_choose_block"></div>
-        <div id="text_count_rank"></div>
+        <div id="doughnut_chart"
+             style="text-align: center; display: inline-block;visibility: hidden; width: 30%">
+            <div id="doughnut_choose_block"></div>
+            <canvas id="myDoughnutChart"></canvas>
+        </div>
+        <div id="textCount"
+             style="display: inline-block;visibility: hidden; width: 30%">
+            <div id="text_count_choose_block"></div>
+            <div id="text_count_rank"></div>
+        </div>
     </div>
 </div>
 </div>
