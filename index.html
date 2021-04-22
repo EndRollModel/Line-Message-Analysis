@@ -5,11 +5,10 @@
     <title>Line對話分析</title>
     <style type="text/css">
         #line_chart, #bar_chart, #doughnut_chart, #textCount {
-            background-color: lightslategray;
             margin: 0 auto;
         }
         canvas {
-            margin: 0 auto;
+            /*margin: 0 auto;*/
         }
 
         #uploadLabel {
@@ -30,32 +29,33 @@
 <label id="uploadLabel" for="uploadLineChat" style="display: block; text-align: center">
     <!--    <img style="text-align: center" js="upload.png">-->
     上傳對話紀錄
-    <input type="file" id="uploadLineChat" name="uploadLineChat" data-target="file-uploader"
+    <input type="file" id="uploadLineChat" name="uploadLineChat"
            style="height: 0px; width: 0px;text-align: center">
 </label>
 <br/>
 <div>
     <div>
         <div id="line_chart"
-             style="text-align: center; display: inline-block;visibility: hidden;position: relative; width: 30%">
+             style="text-align: center; display: inline-block;visibility: hidden;position: relative; width: 45%">
             <canvas id="myLineChart"></canvas>
         </div>
         <div id="bar_chart"
-             style="text-align: center; display: inline-block;visibility: hidden;position: relative; width: 30%">
+             style="text-align: center; display: inline-block;visibility: hidden;position: relative; width: 45%">
             <canvas id="myBarChart"></canvas>
         </div>
+    </div>
+    <div>
         <div id="doughnut_chart"
-             style="text-align: center; display: inline-block;visibility: hidden; width: 30%">
+             style="text-align: center; display: inline-block;position: relative;visibility: hidden; width: 35%">
             <div id="doughnut_choose_block"></div>
             <canvas id="myDoughnutChart"></canvas>
         </div>
         <div id="textCount"
-             style="display: inline-block;visibility: hidden; width: 30%">
+             style="text-align: center; display: inline-block;position: relative;visibility: hidden; width: 35%">
             <div id="text_count_choose_block"></div>
             <div id="text_count_rank"></div>
         </div>
     </div>
-</div>
 </div>
 <br/>
 <script src="js/wordfreq.js"></script>
