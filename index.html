@@ -3,16 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>Line對話分析</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <style type="text/css">
-        #line_chart, #bar_chart, #doughnut_chart, #textCount {
-            margin: 0 auto;
+        #parent_div, #parent_div2{
+            display: flex;
+            flex-wrap:wrap;
+            justify-content:center;
+            align-items: stretch;
         }
-        canvas {
+        #line_chart, #bar_chart, #doughnut_chart, #textCount {
+            flex: none;
+            width: 50%;
+            background-color: lightslategray;
             /*margin: 0 auto;*/
         }
-
+        canvas {
+            flex: auto;
+        }
         #uploadLabel {
-            width: 20%;
+            width: 25%;
             margin: auto;
             background-color: white;
             color: black;
@@ -21,6 +30,17 @@
         #uploadLabel:hover {
             background-color: #008CBA;
             color: white;
+        }
+        input[name="chooseChatType"]{
+            /*radio box*/
+        }
+        @media (max-width:500px){
+            #line_chart, #bar_chart, #doughnut_chart, #textCount{
+                width:100%;
+            }
+        }
+        #text_count_choose_block, doughnut_choose_block{
+            text-align: center;
         }
     </style>
 </head>
@@ -34,26 +54,26 @@
 </label>
 <br/>
 <div>
-    <div>
+    <div id="parent_div">
         <div id="line_chart"
-             style="text-align: center; display: inline-block;visibility: hidden;position: relative; width: 45%">
+             style="visibility: hidden;">
             <canvas id="myLineChart"></canvas>
         </div>
         <div id="bar_chart"
-             style="text-align: center; display: inline-block;visibility: hidden;position: relative; width: 45%">
+             style="visibility: hidden;">
             <canvas id="myBarChart"></canvas>
         </div>
     </div>
-    <div>
+    <div id="parent_div2">
         <div id="doughnut_chart"
-             style="text-align: center; display: inline-block;position: relative;visibility: hidden; width: 35%">
+             style="visibility: hidden;">
             <div id="doughnut_choose_block"></div>
             <canvas id="myDoughnutChart"></canvas>
         </div>
         <div id="textCount"
-             style="text-align: center; display: inline-block;position: relative;visibility: hidden; width: 35%">
+             style="visibility: hidden;">
             <div id="text_count_choose_block"></div>
-            <div id="text_count_rank"></div>
+            <div id="text_count_rank" style="text-align: center"></div>
         </div>
     </div>
 </div>

@@ -188,7 +188,7 @@ async function formatLine(e) {
     });
     // 對話種類次數
     Object.keys(memberChatCount).map((username)=>{
-        const chatTotal = Object.values(memberChatCount[username]).reduce((a,b)=>a+b);
+        const chatTotal = Object.values(memberChatCount[username]).reduce((a,b)=>a+'\n'+b);
         memberChatCount[username][textLang] = memberChatCount[username][totalLang] - (chatTotal - memberChatCount[username][totalLang]);
     })
 
