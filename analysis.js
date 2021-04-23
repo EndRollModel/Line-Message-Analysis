@@ -9,6 +9,7 @@ const doughnutBlock = document.getElementById('doughnut_choose_block');
 const textCountCBlock = document.getElementById('text_count_choose_block');
 const textCountRank = document.getElementById('text_count_rank');
 const textCountDiv = document.getElementById('textCount');
+const loadingImage = document.getElementById('loadingAlert');
 
 //allData
 let pageData;
@@ -29,6 +30,7 @@ async function formatLine(e) {
     title.style.display = 'none';
     uploadData.style.display = 'none';
     uploadLabel.style.display = 'none';
+    loadingImage.style.visibility = "visible"
     const fileInfo = e.target.files[0]
     const file = await fileInfo.text();
     let dayMatch;
@@ -188,7 +190,7 @@ async function formatLine(e) {
     });
     // 對話種類次數
     Object.keys(memberChatCount).map((username)=>{
-        const chatTotal = Object.values(memberChatCount[username]).reduce((a,b)=>a+'\n'+b);
+        const chatTotal = Object.values(memberChatCount[username]).reduce((a,b)=>a+b);
         memberChatCount[username][textLang] = memberChatCount[username][totalLang] - (chatTotal - memberChatCount[username][totalLang]);
     })
 
@@ -208,7 +210,6 @@ async function formatLine(e) {
         }
     });
     // 分析字詞出現次數
-    chatFreq(allData.personChat);
 
     // 文字版
     // 對話次數
@@ -232,6 +233,10 @@ async function formatLine(e) {
     // 對話內容分析
     document.getElementById('doughnut_chart').style.visibility = 'visible';
     createChatType(pageData);
+    // 字詞分析內容
+    chatFreq(allData.personChat);
+
+    loadingImage.style.visibility = "hidden";
 
 }
 
@@ -245,7 +250,7 @@ function chatFreq(personChat) {
     Object.keys(personChat).forEach((username)=>{
         if(personChat[username].length > 0){
             const userRecord = personChat[username].reduce((a, b)=>{
-                return a.toString() + b.toString()
+                return a.toString() + '\n' + b.toString()
             })
             wordAnalysis[username] = WordFreqSync().process(userRecord)
         }
@@ -283,6 +288,7 @@ function createRateOfDay(data) {
     let delayed;
     const lineDatasetsArrays = [];
     const colors = colorSet(Object.keys(data.time).length);
+    console.log(colors)
     Object.keys(data.time).map((elem, index) => {
         if (elem === totalLang) {
             return;
@@ -290,8 +296,8 @@ function createRateOfDay(data) {
         lineDatasetsArrays.push({
             label: elem,
             data: Object.values(data.time[elem]),
-            backgroundColor: colors.backgroundColor[index],
-            borderColor: colors.borderColor[index],
+            backgroundColor: colors.backgroundColor[index-1],
+            borderColor: colors.borderColor[index-1],
             borderWidth: 1
         })
     })
@@ -336,7 +342,7 @@ function createChatCount(data) {
     let barDelayed = true
     const barDatasetsArrays = [];
     const countColors = colorSet(Object.keys(data.count).length);
-    Object.keys(data.count).map((elem, index) => {
+    Object.keys(data.count).forEach((elem, index) => {
         const countData = {};
         countData[elem] = data.count[elem][totalLang];
         barDatasetsArrays.push({
@@ -393,9 +399,9 @@ function createChatType(data) {
     const radioUser = []; // 選擇用
     Object.keys(data.count).forEach((username) => {
         radioUser.push(username);
+        console.log(JSON.stringify(data.count[username]))
         const userData = JSON.parse(JSON.stringify(data.count[username]));
         delete userData[totalLang];
-        // console.log(userData);
         doughnutLabelData.push(userData);
         doughnutInfoData.push({
             // labels : Object.keys(allData.count[username]),
@@ -445,6 +451,18 @@ function textCountChoose(number){
 }
 
 /**
+ * 根據選擇對象 改變圓餅圖的內容
+ * @param number
+ */
+function chooseDoughnut(number) {
+    doughnutChart.data.labels.pop();
+    doughnutChart.data.datasets.pop();
+    doughnutChart.data.labels = Object.keys(doughnutLabelData[number]);
+    doughnutChart.data.datasets.push(doughnutInfoData[number]);
+    doughnutChart.update();
+}
+
+/**
  * 顏色列表 (官方sample顏色)
  * @param count
  * @return {}
@@ -469,14 +487,3 @@ function colorSet(count) {
     return returnObject;
 }
 
-/**
- * 根據選擇對象 改變圓餅圖的內容
- * @param number
- */
-function chooseDoughnut(number) {
-    doughnutChart.data.labels.pop();
-    doughnutChart.data.datasets.pop();
-    doughnutChart.data.labels = Object.keys(doughnutLabelData[number]);
-    doughnutChart.data.datasets.push(doughnutInfoData[number]);
-    doughnutChart.update();
-}

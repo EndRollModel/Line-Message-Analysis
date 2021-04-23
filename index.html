@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Line對話分析</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
     <style type="text/css">
-        #parent_div, #parent_div2{
+        #parent_div, #parent_div2 {
             display: flex;
-            flex-wrap:wrap;
-            justify-content:center;
+            flex-wrap: wrap;
+            justify-content: center;
             align-items: stretch;
         }
+
         #line_chart, #bar_chart, #doughnut_chart, #textCount {
+            margin-bottom: 70px;
             flex: none;
-            width: 50%;
-            background-color: lightslategray;
-            /*margin: 0 auto;*/
+            width: 45%;
         }
+
         canvas {
-            flex: auto;
         }
+
         #uploadLabel {
             width: 25%;
             margin: auto;
@@ -27,20 +28,45 @@
             color: black;
             border: 2px solid #008CBA;
         }
+
         #uploadLabel:hover {
             background-color: #008CBA;
             color: white;
         }
-        input[name="chooseChatType"]{
+
+        input[name="chooseChatType"] {
             /*radio box*/
         }
-        @media (max-width:500px){
-            #line_chart, #bar_chart, #doughnut_chart, #textCount{
-                width:100%;
+        @media (max-width: 700px) {
+            #line_chart, #bar_chart, #doughnut_chart, #textCount {
+                width: 85%;
+                margin-bottom: 70px;
+                flex: none;
             }
         }
-        #text_count_choose_block, doughnut_choose_block{
+
+        @media (max-width: 400px) {
+            #line_chart, #bar_chart, #doughnut_chart, #textCount {
+                width: 100%;
+                margin-bottom: 50px;
+                flex: none;
+            }
+        }
+        #text_count_choose_block, #doughnut_choose_block {
             text-align: center;
+        }
+        #loadingAlert{
+            width: 450px;
+            height: 450px;
+            display: flex;
+            flex-flow: column;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -225px;
+            margin-left: -225px;
+            text-align: center;
+            visibility: hidden;
         }
     </style>
 </head>
@@ -53,28 +79,52 @@
            style="height: 0px; width: 0px;text-align: center">
 </label>
 <br/>
-<div>
-    <div id="parent_div">
-        <div id="line_chart"
-             style="visibility: hidden;">
-            <canvas id="myLineChart"></canvas>
-        </div>
-        <div id="bar_chart"
-             style="visibility: hidden;">
-            <canvas id="myBarChart"></canvas>
-        </div>
+<!--<div>-->
+<!--    <div id="parent_div">-->
+<!--        <div id="line_chart"-->
+<!--             style="visibility: hidden;">-->
+<!--            <canvas id="myLineChart"></canvas>-->
+<!--        </div>-->
+<!--        <div id="bar_chart"-->
+<!--             style="visibility: hidden;">-->
+<!--            <canvas id="myBarChart"></canvas>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div id="parent_div2">-->
+<!--        <div id="doughnut_chart"-->
+<!--             style="visibility: hidden;">-->
+<!--            <div id="doughnut_choose_block"></div>-->
+<!--            <canvas id="myDoughnutChart"></canvas>-->
+<!--        </div>-->
+<!--        <div id="textCount"-->
+<!--             style="visibility: hidden;">-->
+<!--            <div id="text_count_choose_block"></div>-->
+<!--            <div id="text_count_rank" style="text-align: center"></div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<div id="loadingAlert">
+    <img src="bear.gif">
+    讀取中 請稍候！
+</div>
+<div id="parent_div">
+    <div id="line_chart"
+         style="visibility: hidden;">
+        <canvas id="myLineChart"></canvas>
     </div>
-    <div id="parent_div2">
-        <div id="doughnut_chart"
-             style="visibility: hidden;">
-            <div id="doughnut_choose_block"></div>
-            <canvas id="myDoughnutChart"></canvas>
-        </div>
-        <div id="textCount"
-             style="visibility: hidden;">
-            <div id="text_count_choose_block"></div>
-            <div id="text_count_rank" style="text-align: center"></div>
-        </div>
+    <div id="bar_chart"
+         style="visibility: hidden;">
+        <canvas id="myBarChart"></canvas>
+    </div>
+    <div id="doughnut_chart"
+         style="visibility: hidden;">
+        <div id="doughnut_choose_block"></div>
+        <canvas id="myDoughnutChart"></canvas>
+    </div>
+    <div id="textCount"
+         style="visibility: hidden;">
+        <div id="text_count_choose_block"></div>
+        <div id="text_count_rank" style="text-align: center"></div>
     </div>
 </div>
 <br/>
