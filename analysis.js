@@ -236,8 +236,8 @@ async function formatLine(e) {
     // 字詞分析內容
     chatFreq(allData.personChat);
 
-    loadingImage.style.visibility = "hidden";
 
+    loadingImage.style.visibility = "hidden";
 }
 
 /**
@@ -278,6 +278,7 @@ function chatFreq(personChat) {
     textCountDiv.style.visibility = 'visible';
     textCountCBlock.innerHTML = chooseRadio;
     textCountRank.innerHTML = textCount[0];
+
 }
 
 /**
