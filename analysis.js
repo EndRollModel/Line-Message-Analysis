@@ -38,7 +38,8 @@ async function formatLine(e) {
     const dayMatch_zh_tw = /(2[0-1][0-9][0-9])\/([0-9]|0[1-9]|1[0-2])\/((0[1-9]|[12]\d|3[01])|([1-9]|[12]\d|3[01]))（(週[一二三四五六日]|[一|二三四五六日])）/g; // 中文
     const dayMatch_en = /(Sun|Mon|Tue|Wed|Thu|Fri|Sat), ((0[1-9]|[12]\d|3[01])|([1-9]|[12]\d|3[01]))\/([0-9]|0[1-9]|1[0-2])\/((2)[0-1][0-9][0-9])/g // 英文
     // 聊天標籤
-    const chatMatch = /^(0[0-9]|1[0-9]|2[0-3]):(([012345])[0-9])\t/g; // 若為聊天格式
+    // const chatMatch = /^(0[0-9]|1[0-9]|2[0-3]):(([012345])[0-9])\t/g; // 若為聊天格式
+    const chatMatch = /^(上午|下午|)(0[0-9]|1[0-9]|2[0-3]):(([012345])[0-9])\t/g; // 若為聊天格式
     // 名字標籤
     const nameMatch = /\t.*?\t/g;
     // 特殊狀態
@@ -161,7 +162,16 @@ async function formatLine(e) {
                     memberChatCount[name][chatType]++;
                 }
                 // 計算對話頻率
-                const tempHour = item.match(chatMatch)[0].split(':')[0];
+                let tempHour = item.match(chatMatch)[0].split(':')[0];
+                if(tempHour.match(/上午|下午/g) !== null){ // 如果沒有24小時制
+                    if(tempHour.indexOf('上午')>-1){
+                        tempHour.replace('上午', '');
+                    } else {
+                        const hourDef = tempHour.replace('下午', '');
+                        const hourTF = (parseInt(hourDef) + 12).toString();
+                        tempHour = tempHour.replace(hourDef, hourTF).replace('下午','')
+                    }
+                }
                 let hourKey = tempHour.length === 2 && tempHour.indexOf('0') === 0 ? tempHour.replace('0', '') : tempHour; // 將0去掉
                 if (!allData.time.hasOwnProperty(totalLang)) {
                     allData.time[totalLang] = JSON.parse(JSON.stringify(timeTag));
@@ -289,7 +299,6 @@ function createRateOfDay(data) {
     let delayed;
     const lineDatasetsArrays = [];
     const colors = colorSet(Object.keys(data.time).length);
-    console.log(colors)
     Object.keys(data.time).map((elem, index) => {
         if (elem === totalLang) {
             return;
@@ -400,7 +409,7 @@ function createChatType(data) {
     const radioUser = []; // 選擇用
     Object.keys(data.count).forEach((username) => {
         radioUser.push(username);
-        console.log(JSON.stringify(data.count[username]))
+        // console.log(JSON.stringify(data.count[username]))
         const userData = JSON.parse(JSON.stringify(data.count[username]));
         delete userData[totalLang];
         doughnutLabelData.push(userData);
