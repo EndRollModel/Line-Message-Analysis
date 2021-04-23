@@ -6,40 +6,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
     <style type="text/css">
         /*父元件*/
-        #parent_div{
+        #parent_div {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-items: stretch;
         }
+
         /*子元件*/
         #line_chart, #bar_chart, #doughnut_chart, #textCount {
             margin-bottom: 70px;
             flex: none;
             width: 45%;
         }
+
+        #line_chat_analysis{
+            text-align: center;
+        }
+
         canvas {
         }
+
         /*上傳按鈕*/
         #uploadLabel {
+            border-radius: 25px;
             width: 25%;
-            margin: auto;
+            margin: 0 auto;
             background-color: white;
+            text-align: center;
             color: black;
             border: 2px solid #008CBA;
         }
+
         #uploadLabel:hover {
             background-color: #008CBA;
             color: white;
         }
+
         /*radioBox 種類*/
         input[name="chooseChatType"] {
         }
+
         #text_count_choose_block, #doughnut_choose_block {
             text-align: center;
         }
+
         /*load圖*/
-        #loadingAlert{
+        #loadingAlert {
             width: 450px;
             height: 450px;
             display: flex;
@@ -52,9 +65,11 @@
             text-align: center;
             visibility: hidden;
         }
-        #loadingAlert > b{
+
+        #loadingAlert > b {
             font-size: 35px;
         }
+
         /*縮放比例*/
 
         /*手機橫拿*/
@@ -64,7 +79,8 @@
                 margin-bottom: 70px;
                 flex: none;
             }
-            #loadingAlert{
+
+            #loadingAlert {
                 width: 200px;
                 height: 200px;
                 display: flex;
@@ -77,18 +93,21 @@
                 text-align: center;
                 visibility: hidden;
             }
-            #loadingAlert > b{
+
+            #loadingAlert > b {
                 font-size: 20px;
             }
         }
+
         /*手機直拿*/
-        @media (max-width: 420px){
+        @media (max-width: 450px) {
             #line_chart, #bar_chart, #doughnut_chart, #textCount {
                 width: 100%;
                 margin-bottom: 50px;
                 flex: none;
             }
-            #loadingAlert{
+
+            #loadingAlert {
                 width: 200px;
                 height: 200px;
                 display: flex;
@@ -101,20 +120,26 @@
                 text-align: center;
                 visibility: hidden;
             }
-            #loadingAlert > b{
+
+            #loadingAlert > b {
                 font-size: 20px;
+            }
+
+            #line_chat_analysis{
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
+<div id="line_chat_analysis">
 <h3 id="title" style="text-align: center">Line對話分析工具 (測試版本)</h3>
-<label id="uploadLabel" for="uploadLineChat" style="display: block; text-align: center">
-    <!--    <img style="text-align: center" js="upload.png">-->
-    上傳對話紀錄
-    <input type="file" id="uploadLineChat" name="uploadLineChat"
-           style="height: 0px; width: 0px;text-align: center">
-</label>
+    <label id="uploadLabel" for="uploadLineChat" style="display: block; text-align: center">
+        上傳對話紀錄
+        <input type="file" id="uploadLineChat" name="uploadLineChat"
+               style="height: 0px; width: 0px;text-align: center">
+    </label>
+</div>
 <br/>
 <!--<div>-->
 <!--    <div id="parent_div">-->
