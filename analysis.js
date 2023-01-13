@@ -41,7 +41,7 @@ async function formatLine(e) {
     // const chatMatch = /^(0[0-9]|1[0-9]|2[0-3]):(([012345])[0-9])\t/g; // 若為聊天格式
     const chatMatch = /^(上午|下午|)(0[0-9]|1[0-9]|2[0-3]):(([012345])[0-9])\t/g; // 若為聊天格式
     // 名字標籤
-    const nameMatch = /\t.*?\t/g;
+    const nameMatch = /\t.+?\t/g;
     // 特殊狀態
     const systemMatch = /(0[0-9]|1[0-9]|2[0-3]):(([012345])[0-9])\t.*?\t\[(檔案|照片|貼圖|禮物|影片|Video|File|Photo|Sticker)]/g // 對話內容若為傳送圖片等
     const onlySMatch = /\[(檔案|照片|貼圖|禮物|影片|Video|File|Photo|Sticker)]/g
